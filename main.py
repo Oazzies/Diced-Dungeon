@@ -9,15 +9,15 @@ def dice(sides):
 
 def roll():
     global dice_choice
-    dice_choice = input("[What dice will you use? (" + ", ".join(player.dices) + ")] \n")
+    dice_choice = int(input("[What dice will you use? (" + ", ".join(map(lambda x: "d" + str(x), player.dices)) + ")] \n"))
 
-    print("You chose: " + dice_choice)
+    print("You chose: d" + str(dice_choice))
 
     if dice_choice not in player.dices:
         print("[Invalid dice]")
-        return "break"
+        return "break" #fix this
     
-    roll = dice(dice_choice.split("d")[1])
+    roll = dice(dice_choice)
     
     player.dices.remove(dice_choice)
 
@@ -34,7 +34,7 @@ def player_stats():
     time.sleep(0.3)
     print("Defense:" + str(player.defense))
     time.sleep(0.3)
-    print("Dices: " + ", ".join(player.dices) + "\n")
+    print("Dices: " + ", ".join(map(lambda x: "d" + str(x), player.dices)) + "\n")
 
 def enemy_stats():
     print("[Enemy Stats]")
@@ -52,8 +52,8 @@ def increase_turn():
 
 print("---------- Welcome to Diced Dungeon ----------\n")
 
-player = Player(100, 20, 10, ["d2", "d6", "d10", "d16", "d20", "d32", "d54"], 300)
-enemy = Enemy(500, 30, 5)
+player = Player(100, 20, 10, [4, 6, 10, 16, 20, 24, 28, 30, 32, 36, 40, 46, 52, 60], 300)
+enemy = Enemy("Tim", 500, 30, 5)
 
 turn = 1
 
@@ -104,13 +104,13 @@ while True:
             if enemy_action != "special attack":
                 if enemy_action == "light attack":
                     chance = roll()
-                    if chance <= int(dice_choice.split("d")[1]) / 4:
+                    if chance <= dice_choice / 4:
                         print("[You dodged the attack] \n")
                         increase_turn()
                         continue
                 elif enemy_action == "heavy attack":
                         chance = roll()
-                        if chance <= int(dice_choice.split("d")[1]) / 2:
+                        if chance <= dice_choice / 2:
                             print("[You dodged the attack] \n")
                             increase_turn()
                             continue 
