@@ -7,7 +7,7 @@ class Action(Enum):
     SPECIAL_ATTACK = 2
 
 class Enemy():
-    def __init__(self, health, attack, defense, name):
+    def __init__(self, name, health, attack, defense):
         self.name = name
         self.health = health
         self.attack = attack
