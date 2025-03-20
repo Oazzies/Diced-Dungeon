@@ -63,7 +63,7 @@ def increase_turn():
 
 print("---------- Welcome to Diced Dungeon ----------\n")
 
-player = Player(100, 20, 10, {10: 6, 30: 3, 50: 1}, 300)
+player = Player(100, 20, 10, 10, {10: 6, 30: 3, 50: 1}, 300)
 enemy = Enemy("Tim", 500, 30, 5)
 
 turn = 1
@@ -112,50 +112,62 @@ while True:
         case "attack":
             damage = roll()
             enemy.health -= (player.attack + damage) - enemy.defense
-            print(f"[You dealt ({player.attack} + {damage}) - {enemy.defense} = {(player.attack + damage) - enemy.defense} damage]")
+            print(f"[damage = player attack - enemy defense]")
         case "parry":
-            chance = roll()
-            if Action.LIGHT_ATTACK and chance >= enemy.attack:
-                print("[You parried the attack] \n")
-                damaged = False
+            if Action.LIGHT_ATTACK:
+                [f"[You wil need to roll higher than {enemy.attack} to parry]"]
+                chance = roll() + player.speed
+                if chance >= enemy.attack:
+                    print("[You parried the attack] \n")
+                    damaged = False
 
-                damage = roll()
-                enemy.health -= (player.attack + damage) - enemy.defense
-                print(f"[You dealt ({player.attack} + {damage}) - {enemy.defense} = {(player.attack + damage) - enemy.defense} damage]")
-                increase_turn()
-                continue
-            elif Action.HEAVY_ATTACK and chance >= enemy.attack + (enemy.attack / 2):
-                print("[You parried the attack] \n")
-                damaged = False
+                    damage = roll()
+                    enemy.health -= (player.attack + damage) - enemy.defense
+                    print(f"[damage = player attack - enemy defense]")
+                    increase_turn()
+                    continue
+            elif Action.HEAVY_ATTACK:
+                [f"[You wil need to roll higher than {enemy.attack + (enemy.attack / 2)} to parry]"]
+                chance = roll()
+                if chance >= enemy.attack + (enemy.attack / 2):
+                    print("[You parried the attack] \n")
+                    damaged = False
 
-                damage = roll()
-                enemy.health -= (player.attack + damage) - enemy.defense
-                print(f"[You dealt ({player.attack} + {damage}) - {enemy.defense} = {(player.attack + damage) - enemy.defense} damage]")
-                increase_turn()
-                continue
-            elif Action.SPECIAL_ATTACK and chance >= enemy.attack / 2:
-                print("[You parried the attack] \n")
-                damaged = False
+                    damage = roll()
+                    enemy.health -= (player.attack + damage) - enemy.defense
+                    print(f"[damage = player attack - enemy defense]")
+                    increase_turn()
+                    continue
+            elif Action.SPECIAL_ATTACK:            
+                [f"[You wil need to roll higher than {enemy.attack / 2} to parry]"]
+                chance = roll()
+                if chance >= enemy.attack / 2:
+                    print("[You parried the attack] \n")
+                    damaged = False
 
-                damage = roll()
-                enemy.health -= (player.attack + damage) - enemy.defense
-                print(f"[You dealt ({player.attack} + {damage}) - {enemy.defense} = {(player.attack + damage) - enemy.defense} damage]")
-                increase_turn()
-                continue
+                    damage = roll()
+                    enemy.health -= (player.attack + damage) - enemy.defense
+                    print(f"[damage = player attack - enemy defense]")
+                    increase_turn()
+                    continue
         case "dodge":
             if enemy_action != Action.SPECIAL_ATTACK:
                 if enemy_action == Action.LIGHT_ATTACK:
+                    print("[To dodge, you will need to roll lower then 25% of your dice choice]")
                     chance = roll()
                     if chance <= sides // 4:
                         print("[You dodged the attack] \n")
                         increase_turn()
                         continue
+                    print("[Dodge failed]")
                 elif enemy_action == Action.HEAVY_ATTACK:
-                        chance = roll()
-                        if chance <= sides // 2:
-                            print("[You dodged the attack] \n")
-                            increase_turn()
-                            continue 
+                    print("[To dodge, you will need to roll lower then 50% of your dice choice]")
+                    chance = roll()
+                    if chance <= sides // 2:
+                        print("[You dodged the attack] \n")
+                        increase_turn()
+                        continue 
+                    print("[Dodge failed]")
             else:
                 print("[The area damage still got to you!]")
         case _:
@@ -167,9 +179,9 @@ while True:
         player.health -= round(damage)
         print(f"[Enemy dealt {damage} damage] \n")
     elif enemy_action == Action.HEAVY_ATTACK:
-        damage = round(enemy.attack + (enemy.attack / 2)) - player.defense
+        damage = (enemy.attack * 2) - player.defense
         player.health -= damage
-        print(f"[Enemy dealth {enemy.attack} + ({enemy.attack} / 2) = {round(enemy.attack + (enemy.attack / 2))} damage] \n")
+        print(f"[Enemy dealth {enemy.attack} * 2 = {enemy.attack * 2} damage] \n")
     elif enemy_action == Action.SPECIAL_ATTACK:
         damage = (enemy.attack / 2) - player.defense
         player.health -= round(damage / 2)
