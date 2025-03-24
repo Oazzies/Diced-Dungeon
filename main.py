@@ -1,8 +1,38 @@
 import random
 import time
+from enum import Enum
 
-from player import Player
-from enemy import Enemy, Action
+class Action(Enum):
+    LIGHT_ATTACK = 0
+    HEAVY_ATTACK = 1
+    SPECIAL_ATTACK = 2
+
+class Enemy():
+    def __init__(self, name, health, attack, defense):
+        self.name = name
+        self.health = health
+        self.attack = attack
+        self.defense = defense
+
+    def action(self):
+        action_choice = random.randint(0, 2)
+
+        match action_choice:
+            case 0:
+                return Action.LIGHT_ATTACK
+            case 1:
+                return Action.HEAVY_ATTACK
+            case 2:
+                return Action.SPECIAL_ATTACK
+            
+class Player():
+    def __init__(self, health, attack, defense, speed, dices, gold):
+        self.health = health
+        self.attack = attack
+        self.defense = defense
+        self.speed = speed
+        self.dices = dices
+        self.gold = gold
 
 def dice(sides):
     return random.randint(1, int(sides))
@@ -63,8 +93,8 @@ def increase_turn():
 
 print("---------- Welcome to Diced Dungeon ----------\n")
 
-player = Player(100, 20, 10, 10, {10: 6, 30: 3, 50: 1}, 300)
-enemy = Enemy("Tim", 500, 30, 5)
+player = Player(100, 40, 10, 10, {10: 6, 30: 3, 50: 1}, 300)
+enemy = Enemy("Goblin Lord", 300, 15, 5)
 
 turn = 1
 
@@ -92,19 +122,20 @@ while True:
         case Action.HEAVY_ATTACK:
             print("[" + enemy.name + " will do a heavy attack]")
             time.sleep(0.2)
-            print("- A heavy attack will do 50% more damage then a light attack (" + str(round(enemy.attack + (enemy.attack / 2))) + ")")
+            print("- A heavy attack will do 50% more damage then a light attack (" + str(enemy.attack + (enemy.attack / 2)) + ")")
             time.sleep(0.1)
             print("- To dodge, roll lower then your dice choice divided by 4")
             time.sleep(0.1)
-            print("- To parry, roll higher than the enemy attack stats (" + str(round(enemy.attack + (enemy.attack / 2))) + ")\n")
+            print("- To parry, roll higher than the enemy attack stats (" + str(enemy.attack + (enemy.attack / 2)) + ")\n")
         case Action.SPECIAL_ATTACK:
             print("[" + enemy.name + " will do a special attack]")
             time.sleep(0.2)
-            print("- A special attack will do half of the enemy attack stats amount of damage (" + str(round(enemy.attack / 2)) + ")")
+            print("- A special attack will do half of the enemy attack stats amount of damage (" + str(enemy.attack / 2) + ")")
             time.sleep(0.1)
             print("- Since a special attack is AOE its impossible to dodge")
             time.sleep(0.1)
-            print("- To parry, roll higher than the heavy attack damage (" + str(round(enemy.attack / 2)) + ")\n")
+            print("- To parry, roll higher than the special attack damage (" + str(enemy.attack / 2) + ")")
+            print("- A successfull parry gives the player a free attack\n")
     time.sleep(0.5)
     command = input("[What will you do? (attack, parry, dodge)] \n")
 
@@ -112,7 +143,7 @@ while True:
         case "attack":
             damage = roll()
             enemy.health -= (player.attack + damage) - enemy.defense
-            print(f"[damage = player attack - enemy defense]")
+            print(f"[You dealt: ({player.attack} + {damage}) - {enemy.defense} = {(player.attack + damage) - enemy.defense} damage] \n")
         case "parry":
             if Action.LIGHT_ATTACK:
                 [f"[You wil need to roll higher than {enemy.attack} to parry]"]
@@ -123,7 +154,7 @@ while True:
 
                     damage = roll()
                     enemy.health -= (player.attack + damage) - enemy.defense
-                    print(f"[damage = player attack - enemy defense]")
+                    print(f"[You dealt: ({player.attack} + {damage}) - {enemy.defense} = {(player.attack + damage) - enemy.defense} damage] \n")
                     increase_turn()
                     continue
             elif Action.HEAVY_ATTACK:
@@ -135,7 +166,7 @@ while True:
 
                     damage = roll()
                     enemy.health -= (player.attack + damage) - enemy.defense
-                    print(f"[damage = player attack - enemy defense]")
+                    print(f"[You dealt: ({player.attack} + {damage}) - {enemy.defense} = {(player.attack + damage) - enemy.defense} damage] \n")
                     increase_turn()
                     continue
             elif Action.SPECIAL_ATTACK:            
@@ -147,13 +178,12 @@ while True:
 
                     damage = roll()
                     enemy.health -= (player.attack + damage) - enemy.defense
-                    print(f"[damage = player attack - enemy defense]")
+                    print(f"[You dealt: ({player.attack} + {damage}) - {enemy.defense} = {(player.attack + damage) - enemy.defense} damage] \n")
                     increase_turn()
                     continue
         case "dodge":
             if enemy_action != Action.SPECIAL_ATTACK:
                 if enemy_action == Action.LIGHT_ATTACK:
-                    print("[To dodge, you will need to roll lower then 25% of your dice choice]")
                     chance = roll()
                     if chance <= sides // 4:
                         print("[You dodged the attack] \n")
@@ -161,7 +191,6 @@ while True:
                         continue
                     print("[Dodge failed]")
                 elif enemy_action == Action.HEAVY_ATTACK:
-                    print("[To dodge, you will need to roll lower then 50% of your dice choice]")
                     chance = roll()
                     if chance <= sides // 2:
                         print("[You dodged the attack] \n")
@@ -176,16 +205,16 @@ while True:
 
     if enemy_action == Action.LIGHT_ATTACK:
         damage = enemy.attack - player.defense
-        player.health -= round(damage)
-        print(f"[Enemy dealt {damage} damage] \n")
-    elif enemy_action == Action.HEAVY_ATTACK:
-        damage = (enemy.attack * 2) - player.defense
         player.health -= damage
-        print(f"[Enemy dealth {enemy.attack} * 2 = {enemy.attack * 2} damage] \n")
+        print(f"[Enemy dealt {enemy.attack} - {player.defense} = {damage} damage] \n")
+    elif enemy_action == Action.HEAVY_ATTACK:
+        damage = (enemy.attack) * 2 - player.defense
+        player.health -= damage
+        print(f"[Enemy dealt ({enemy.attack} * 2) - {player.defense} = {damage} damage] \n")
     elif enemy_action == Action.SPECIAL_ATTACK:
-        damage = (enemy.attack / 2) - player.defense
-        player.health -= round(damage / 2)
-        print(f"[Enemy dealt {damage} / 2 = {round(damage / 2)} damage] \n")
+        damage = (enemy.attack) / 2 - player.defense
+        player.health -= damage / 2
+        print(f"[Enemy dealt ({enemy.attack} / 2) - {player.defense} = {damage} damage] \n")
 
     if player.health <= 0:
         print("[You lose!]")
